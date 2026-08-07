@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Study Buddy — Your Personal Study OS</title>
+<meta name="description" content="A personal study operating system with an AI study companion, planner, notes, focus timer and progress tracking." />
+<meta name="theme-color" content="#5B6EF5" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="assets/icons/icon-192.png" />
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <span class="brand-mark">🤍</span>
+        <span class="brand-name">Study Buddy</span>
+      </div>
+      <button id="sidebarToggle" class="icon-btn" aria-label="Collapse sidebar">⟨⟩</button>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Main navigation">
+      <a href="#" class="nav-link active" data-section="home"><span class="nav-icon">🏠</span><span>Home</span></a>
+      <a href="#" class="nav-link" data-section="ai"><span class="nav-icon">🤖</span><span>AI Buddy</span></a>
+      <a href="#" class="nav-link" data-section="plans"><span class="nav-icon">📅</span><span>Plans</span></a>
+      <a href="#" class="nav-link" data-section="notes"><span class="nav-icon">📝</span><span>Notes</span></a>
+      <a href="#" class="nav-link" data-section="session"><span class="nav-icon">⏱️</span><span>Study Session</span></a>
+      <a href="#" class="nav-link" data-section="extras"><span class="nav-icon">✨</span><span>Extras</span></a>
+      <a href="#" class="nav-link" data-section="progress"><span class="nav-icon">📊</span><span>Progress</span></a>
+      <a href="#" class="nav-link" data-section="settings"><span class="nav-icon">⚙️</span><span>Settings</span></a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="ai-avatar" data-mood="idle" aria-hidden="true">
+        <div class="avatar-blob">
+          <div class="avatar-face">
+            <span class="eye eye-l"></span><span class="eye eye-r"></span>
+            <span class="mouth"></span>
+          </div>
+        </div>
+      </div>
+      <p class="sidebar-footer-text">Ready to study?</p>
+    </div>
+  </aside>
+
+  <!-- ============ TOP BAR (mobile + notif bell) ============ -->
+  <header class="topbar">
+    <div class="brand brand-mobile">
+      <span class="brand-mark">🤍</span>
+      <span class="brand-name">Study Buddy</span>
+    </div>
+    <div class="topbar-right">
+      <button id="notifBell" class="icon-btn notif-bell" aria-label="Notifications">
+        🔔<span id="notifBadge" class="badge hidden">0</span>
+      </button>
+    </div>
+    <div id="notifCenter" class="notif-center">
+      <div class="notif-center-header">
+        <strong>Notifications</strong>
+        <button id="notifCenterMarkAll" class="link-btn">Mark all read</button>
+      </div>
+      <div id="notifCenterList" class="notif-center-list"></div>
+    </div>
+  </header>
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <main class="main-content">
+
+    <!-- ---------- HOME ---------- -->
+    <section id="section-home" class="app-section active">
+      <div class="section-head">
+        <h1><span id="homeGreetingWord">Good evening</span>, <span id="homeGreetingName">Student</span> <span id="homeGreetingIcon">🌙</span></h1>
+        <p id="homeAiMessage" class="ai-message-line">Ready when you are. What should we work on?</p>
+      </div>
+
+      <div class="today-stats">
+        <div class="stat-card"><span class="stat-icon">📚</span><div><strong id="statClasses">0</strong><p>Classes today</p></div></div>
+        <div class="stat-card"><span class="stat-icon">✅</span><div><strong id="statTasks">0/0</strong><p>Tasks today</p></div></div>
+        <div class="stat-card"><span class="stat-icon">⏱️</span><div><strong id="statStudyTime">0m</strong><p>Studied today</p></div></div>
+        <div class="stat-card"><span class="stat-icon">🔥</span><div><strong id="statStreak">0 days</strong><p>Study streak</p></div></div>
+      </div>
+
+      <div class="home-grid">
+        <div class="card next-class-wrap">
+          <h2>Next Class</h2>
+          <div id="nextClassCard"></div>
+        </div>
+        <div class="card today-tasks-wrap">
+          <h2>Today's Tasks</h2>
+          <div id="homeTaskList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- AI STUDY BUDDY ---------- -->
+    <section id="section-ai" class="app-section">
+      <div class="section-head">
+        <h1>AI Study Buddy</h1>
+        <p class="section-sub">Your friendly companion for the Egyptian secondary-school curriculum.</p>
+      </div>
+
+      <div class="ai-layout">
+        <aside class="convo-panel card">
+          <button id="newConvoBtn" class="btn btn-secondary btn-sm btn-block">+ New chat</button>
+          <div id="conversationList" class="convo-list"></div>
+        </aside>
+
+        <div class="chat-panel card">
+          <div class="chat-panel-header">
+            <div class="ai-avatar sm" data-mood="idle" aria-hidden="true">
+              <div class="avatar-blob"><div class="avatar-face"><span class="eye eye-l"></span><span class="eye eye-r"></span><span class="mouth"></span></div></div>
+            </div>
+            <div>
+              <strong>Study Buddy</strong>
+              <p class="muted small">Here to help you learn</p>
+            </div>
+            <button id="clearChatBtn" class="link-btn" style="margin-left:auto">Clear chat</button>
+          </div>
+
+          <div id="chatMessages" class="chat-messages"></div>
+          <div id="typingIndicator" class="typing-indicator hidden"><span></span><span></span><span></span></div>
+
+          <div class="quick-actions">
+            <button class="quick-action" data-prompt="Explain this">Explain this</button>
+            <button class="quick-action" data-prompt="Quiz me">Quiz me</button>
+            <button class="quick-action" data-prompt="Give me examples">Give me examples</button>
+            <button class="quick-action" data-prompt="Simplify it">Simplify it</button>
+            <button class="quick-action" data-prompt="Help me make a study plan">Make a plan</button>
+            <button class="quick-action" data-prompt="I'm feeling unmotivated">Motivate me</button>
+          </div>
+
+          <form id="chatForm" class="chat-form">
+            <input id="chatInput" type="text" placeholder="Ask anything about your lessons…" autocomplete="off" aria-label="Message Study Buddy" />
+            <button type="submit" class="btn btn-primary" aria-label="Send message">➤</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PLANS ---------- -->
+    <section id="section-plans" class="app-section">
+      <div class="section-head">
+        <h1>Plans</h1>
+        <p class="section-sub">Classes and tasks, all in one place.</p>
+      </div>
+
+      <div class="plans-grid">
+        <div class="card">
+          <div class="card-header-row">
+            <h2>Classes</h2>
+            <button id="addClassBtn" class="btn btn-primary btn-sm">+ Add Class</button>
+          </div>
+          <div id="classList" class="class-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header-row">
+            <h2>Tasks</h2>
+            <button id="addTaskBtn" class="btn btn-primary btn-sm">+ Add Task</button>
+          </div>
+          <div class="filter-row">
+            <button class="task-filter active" data-filter="all">All</button>
+            <button class="task-filter" data-filter="today">Today</button>
+            <button class="task-filter" data-filter="upcoming">Upcoming</button>
+            <button class="task-filter" data-filter="completed">Completed</button>
+            <button class="task-filter" data-filter="high">High priority</button>
+          </div>
+          <div id="taskList" class="task-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- NOTES ---------- -->
+    <section id="section-notes" class="app-section">
+      <div class="section-head">
+        <h1>Notes</h1>
+        <p class="section-sub">Keep everything organized, by subject or topic.</p>
+      </div>
+      <div class="card-header-row notes-toolbar">
+        <input id="noteSearch" type="search" placeholder="Search notes…" class="input" aria-label="Search notes" />
+        <button id="addNoteBtn" class="btn btn-primary btn-sm">+ New Note</button>
+      </div>
+      <div id="noteList" class="note-grid"></div>
+    </section>
+
+    <!-- ---------- STUDY SESSION ---------- -->
+    <section id="section-session" class="app-section">
+      <div class="session-focus">
+        <div class="ai-avatar lg" data-mood="idle" aria-hidden="true">
+          <div class="avatar-blob"><div class="avatar-face"><span class="eye eye-l"></span><span class="eye eye-r"></span><span class="mouth"></span></div></div>
+        </div>
+
+        <input id="sessionSubjectInput" class="input session-subject-input" placeholder="What are you studying?" />
+
+        <div class="timer-mode-toggle">
+          <button class="timer-mode-btn active" data-mode="stopwatch">Stopwatch</button>
+          <button class="timer-mode-btn" data-mode="countdown">Countdown</button>
+        </div>
+
+        <div id="countdownPresets" class="countdown-presets hidden">
+          <button class="countdown-preset" data-minutes="25">25 min</button>
+          <button class="countdown-preset" data-minutes="45">45 min</button>
+          <button class="countdown-preset" data-minutes="60">60 min</button>
+          <button class="countdown-preset" data-minutes="90">90 min</button>
+          <button class="countdown-preset" data-minutes="custom">Custom</button>
+        </div>
+
+        <div id="timerDisplay" class="timer-display">00:00:00</div>
+
+        <div class="timer-controls">
+          <button id="timerStartBtn" class="btn btn-primary btn-lg">Start</button>
+          <button id="timerResumeBtn" class="btn btn-primary btn-lg hidden">Resume</button>
+          <button id="timerPauseBtn" class="btn btn-secondary btn-lg hidden">Pause</button>
+          <button id="timerStopBtn" class="btn btn-accent btn-lg hidden">Stop &amp; Save</button>
+          <button id="timerResetBtn" class="btn btn-ghost btn-lg">Reset</button>
+        </div>
+      </div>
+
+      <div class="card sounds-card">
+        <h2>Study Sounds</h2>
+        <div id="soundGrid" class="sound-grid"></div>
+        <div class="sound-controls">
+          <label class="upload-label">
+            📁 Upload your own sound
+            <input id="soundUpload" type="file" accept="audio/*" hidden />
+          </label>
+          <div class="volume-row">
+            <span>🔈</span>
+            <input id="soundVolume" type="range" min="0" max="100" value="50" aria-label="Volume" />
+            <span>🔊</span>
+          </div>
+          <button id="soundStopBtn" class="btn btn-ghost btn-sm">Stop sound</button>
+        </div>
+        <p id="soundNowPlaying" class="muted small">No sound playing</p>
+      </div>
+    </section>
+
+    <!-- ---------- EXTRAS ---------- -->
+    <section id="section-extras" class="app-section">
+      <div class="section-head">
+        <h1>Extras</h1>
+        <p class="section-sub">Quick reminders, ideas, small goals — whatever doesn't fit elsewhere.</p>
+      </div>
+      <div class="card-header-row">
+        <span></span>
+        <button id="addExtraBtn" class="btn btn-primary btn-sm">+ Add Extra</button>
+      </div>
+      <div id="extrasGrid" class="extras-grid"></div>
+    </section>
+
+    <!-- ---------- PROGRESS ---------- -->
+    <section id="section-progress" class="app-section">
+      <div class="section-head">
+        <h1>Progress</h1>
+        <p class="section-sub">Real stats, calculated from your actual study activity.</p>
+      </div>
+
+      <div class="today-stats">
+        <div class="stat-card"><span class="stat-icon">⏳</span><div><strong id="progTotalTime">0m</strong><p>Total studied</p></div></div>
+        <div class="stat-card"><span class="stat-icon">📆</span><div><strong id="progWeekTime">0m</strong><p>This week</p></div></div>
+        <div class="stat-card"><span class="stat-icon">🔥</span><div><strong id="progStreak">0</strong><p>Day streak</p></div></div>
+        <div class="stat-card"><span class="stat-icon">✅</span><div><strong id="progTasksDone">0</strong><p>Tasks completed</p></div></div>
+        <div class="stat-card"><span class="stat-icon">📚</span><div><strong id="progSessions">0</strong><p>Study sessions</p></div></div>
+        <div class="stat-card"><span class="stat-icon">🏅</span><div><strong id="progTopSubject">—</strong><p>Top subject</p></div></div>
+      </div>
+
+      <div class="card">
+        <h2>Last 7 days</h2>
+        <canvas id="weekChart" class="week-chart"></canvas>
+      </div>
+
+      <div class="card">
+        <h2>Achievements</h2>
+        <div id="achievementGrid" class="achievement-grid"></div>
+      </div>
+    </section>
+
+    <!-- ---------- SETTINGS ---------- -->
+    <section id="section-settings" class="app-section">
+      <div class="section-head">
+        <h1>Settings</h1>
+      </div>
+
+      <form id="settingsForm" class="settings-form">
+        <div class="card">
+          <h2>Profile</h2>
+          <div class="form-grid">
+            <label>Name<input class="input" name="name" required /></label>
+            <label>Grade / Year<input class="input" name="grade" placeholder="e.g. Grade 11" /></label>
+            <label>Curriculum<input class="input" name="curriculum" /></label>
+            <label>Term<input class="input" name="term" /></label>
+            <label>Subjects (comma separated)<input class="input" name="subjects" placeholder="Math, Physics, Arabic" /></label>
+            <label>Current lesson<input class="input" name="lesson" placeholder="e.g. Quadratic equations" /></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Notifications</h2>
+          <p class="muted small" id="notifPermStatus">Not enabled yet</p>
+          <button type="button" id="enableNotifBtn" class="btn btn-secondary btn-sm">Enable browser notifications</button>
+          <div class="toggle-row"><label><input type="checkbox" id="notifClass" checked /> Class reminders</label></div>
+          <div class="toggle-row"><label><input type="checkbox" id="notifTask" checked /> Task reminders</label></div>
+          <div class="toggle-row"><label><input type="checkbox" id="notifStudy" checked /> Study reminders</label></div>
+          <div class="toggle-row"><label><input type="checkbox" id="notifAchievement" checked /> Achievement notifications</label></div>
+          <label class="block-label">Remind me before class<select class="input" name="classReminderMinutes">
+            <option value="15">15 minutes before</option>
+            <option value="30">30 minutes before</option>
+            <option value="60">1 hour before</option>
+            <option value="0">Off</option>
+          </select></label>
+        </div>
+
+        <div class="card">
+          <h2>Appearance</h2>
+          <label class="block-label">Theme<select class="input" name="theme">
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select></label>
+        </div>
+
+        <div class="card">
+          <h2>AI</h2>
+          <label class="block-label">AI personality<select class="input" name="aiPersonality">
+            <option value="friendly">Friendly &amp; encouraging</option>
+            <option value="direct">Direct &amp; efficient</option>
+            <option value="playful">Playful</option>
+          </select></label>
+          <label class="block-label">AI backend URL (optional — leave blank to use built-in offline AI)
+            <input class="input" name="aiBackendUrl" placeholder="https://your-backend.example.com" />
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+      </form>
+
+      <div class="card">
+        <h2>Data</h2>
+        <p class="muted small">Everything is stored locally in your browser (IndexedDB). Export it any time as a backup.</p>
+        <div class="data-btn-row">
+          <button id="exportDataBtn" class="btn btn-secondary btn-sm">Export data</button>
+          <label class="btn btn-secondary btn-sm upload-label">Import data<input id="importDataInput" type="file" accept="application/json" hidden /></label>
+          <button id="clearDataBtn" class="btn btn-danger btn-sm">Clear all data</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ MOBILE BOTTOM NAV ============ -->
+  <nav class="bottom-nav" aria-label="Mobile navigation">
+    <a href="#" class="bottom-nav-link active" data-section="home"><span>🏠</span></a>
+    <a href="#" class="bottom-nav-link" data-section="ai"><span>🤖</span></a>
+    <a href="#" class="bottom-nav-link" data-section="plans"><span>📅</span></a>
+    <a href="#" class="bottom-nav-link" data-section="session"><span>⏱️</span></a>
+    <a href="#" class="bottom-nav-link" data-section="notes"><span>📝</span></a>
+    <a href="#" class="bottom-nav-link" data-section="settings"><span>⚙️</span></a>
+  </nav>
+
+</div>
+
+<!-- ============ MODALS ============ -->
+
+<div id="classModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-header"><h3 id="classModalTitle">Add Class</h3><button class="icon-btn" data-close-modal>✕</button></div>
+    <form id="classForm">
+      <input type="hidden" name="id" />
+      <label>Class name<input class="input" name="name" required /></label>
+      <label>Subject<input class="input" name="subject" /></label>
+      <label>Teacher<input class="input" name="teacher" /></label>
+      <div class="form-row-2">
+        <label>Date<input class="input" type="date" name="date" required /></label>
+        <label>Color<input class="input" type="color" name="color" value="#5B6EF5" /></label>
+      </div>
+      <div class="form-row-2">
+        <label>Start time<input class="input" type="time" name="startTime" required /></label>
+        <label>End time<input class="input" type="time" name="endTime" /></label>
+      </div>
+      <label>Repeat<select class="input" name="repeat" id="classRepeat">
+        <option value="none">Does not repeat</option>
+        <option value="daily">Every day</option>
+        <option value="weekly">Every week</option>
+        <option value="biweekly">Every 2 weeks</option>
+        <option value="custom">Custom</option>
+      </select></label>
+      <label id="classDayOfWeekWrap" class="hidden">Day of week<select class="input" name="dayOfWeek">
+        <option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option>
+        <option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option>
+        <option value="6">Saturday</option>
+      </select></label>
+      <label>Notes<textarea class="input" name="notes" rows="2"></textarea></label>
+      <button type="submit" class="btn btn-primary btn-block">Save Class</button>
+    </form>
+  </div>
+</div>
+
+<div id="taskModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-header"><h3 id="taskModalTitle">Add Task</h3><button class="icon-btn" data-close-modal>✕</button></div>
+    <form id="taskForm">
+      <input type="hidden" name="id" />
+      <label>Title<input class="input" name="title" required /></label>
+      <label>Subject<input class="input" name="subject" /></label>
+      <div class="form-row-2">
+        <label>Due date<input class="input" type="date" name="dueDate" /></label>
+        <label>Due time<input class="input" type="time" name="dueTime" /></label>
+      </div>
+      <label>Priority<select class="input" name="priority">
+        <option value="high">🔴 High</option>
+        <option value="medium" selected>🟡 Medium</option>
+        <option value="low">🟢 Low</option>
+      </select></label>
+      <label>Remind me<select class="input" name="reminder">
+        <option value="0">No reminder</option>
+        <option value="15">15 minutes before</option>
+        <option value="60">1 hour before</option>
+        <option value="1440">1 day before</option>
+      </select></label>
+      <label>Notes<textarea class="input" name="notes" rows="2"></textarea></label>
+      <button type="submit" class="btn btn-primary btn-block">Save Task</button>
+    </form>
+  </div>
+</div>
+
+<div id="noteModal" class="modal">
+  <div class="modal-card modal-card-lg">
+    <div class="modal-header"><h3 id="noteModalTitle">New Note</h3><button class="icon-btn" data-close-modal>✕</button></div>
+    <form id="noteForm">
+      <input type="hidden" name="id" />
+      <label>Title<input class="input" name="title" placeholder="Note title" /></label>
+      <div class="form-row-2">
+        <label>Subject<input class="input" name="subject" /></label>
+        <label>Category<input class="input" name="category" /></label>
+      </div>
+      <label>Content<textarea class="input note-editor" name="body" rows="10" placeholder="Write your notes…"></textarea></label>
+      <label class="checkbox-label"><input type="checkbox" name="pinned" /> Pin this note</label>
+      <div class="modal-actions">
+        <button type="button" id="deleteNoteBtn" class="btn btn-danger hidden">Delete</button>
+        <button type="submit" class="btn btn-primary">Save Note</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="extraModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-header"><h3>Add Extra</h3><button class="icon-btn" data-close-modal>✕</button></div>
+    <form id="extraForm">
+      <label>Type<select class="input" name="type">
+        <option>Reminder</option><option>Idea</option><option>Goal</option>
+        <option>Checklist item</option><option>Useful link</option><option>Note</option>
+      </select></label>
+      <label>Title<input class="input" name="title" required /></label>
+      <label>Details<textarea class="input" name="body" rows="3"></textarea></label>
+      <button type="submit" class="btn btn-primary btn-block">Save</button>
+    </form>
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/sounds.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js").catch((e) => console.warn("SW registration failed", e));
+    });
+  }
+</script>
+</body>
+</html>
